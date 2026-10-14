@@ -21,6 +21,11 @@ fi
 
 [ -f configure ] || autoreconf -fi
 
+# bionic has pthread_create in libc and no libpthread; zvbi's configure insists on linking one. An
+# empty archive satisfies -lpthread (here and in zvbi-0.2.pc, which FFmpeg links with).
+mkdir -p "$prefix_dir/lib"
+[ -f "$prefix_dir/lib/libpthread.a" ] || $AR rcs "$prefix_dir/lib/libpthread.a"
+
 mkdir -p $build
 cd $build
 
