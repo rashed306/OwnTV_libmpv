@@ -1,0 +1,20 @@
+OwnTV: decode DVB teletext subtitles as text (ASS) by default, not as a bitmap of the page.
+
+Why: mpv picks its subtitle path from this default. With "bitmap" it sends teletext to sd_lavc, which
+draws an image — and OwnTV's live direct-render path cannot show images, so teletext never appeared.
+With a text format mpv uses its text path (sub/lavc_conv.c), which itself forces txt_format=ass and
+txt_page=subtitle; the lines then reach mpv's `sub-text`, OwnTV's overlay, styling and translation.
+
+diff --git a/libavcodec/libzvbi-teletextdec.c b/libavcodec/libzvbi-teletextdec.c
+index 06fd54c..c036a5a 100644
+--- a/libavcodec/libzvbi-teletextdec.c
++++ b/libavcodec/libzvbi-teletextdec.c
+@@ -793,7 +793,7 @@ static const AVOption options[] = {
+     {"txt_page",        "page numbers to decode, subtitle for subtitles, * for all", OFFSET(pgno),   AV_OPT_TYPE_STRING, {.str = "*"},      0, 0,        SD},
+     {"txt_default_region", "default G0 character set used for decoding",     OFFSET(default_region), AV_OPT_TYPE_INT,    {.i64 = -1},      -1, 87,       SD},
+     {"txt_chop_top",    "discards the top teletext line",                    OFFSET(chop_top),       AV_OPT_TYPE_INT,    {.i64 = 1},        0, 1,        SD},
+-    {"txt_format",      "format of the subtitles (bitmap or text or ass)",   OFFSET(format_id),      AV_OPT_TYPE_INT,    {.i64 = 0},        0, 2,        SD,  .unit = "txt_format"},
++    {"txt_format",      "format of the subtitles (bitmap or text or ass)",   OFFSET(format_id),      AV_OPT_TYPE_INT,    {.i64 = 2},        0, 2,        SD,  .unit = "txt_format"},
+     {"bitmap",          NULL,                                                0,                      AV_OPT_TYPE_CONST,  {.i64 = 0},        0, 0,        SD,  .unit = "txt_format"},
+     {"text",            NULL,                                                0,                      AV_OPT_TYPE_CONST,  {.i64 = 1},        0, 0,        SD,  .unit = "txt_format"},
+     {"ass",             NULL,                                                0,                      AV_OPT_TYPE_CONST,  {.i64 = 2},        0, 0,        SD,  .unit = "txt_format"},

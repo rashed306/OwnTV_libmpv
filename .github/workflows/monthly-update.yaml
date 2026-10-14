@@ -4,9 +4,8 @@ name: Monthly mpv update
 # build it with the full contract check, and open a pull request that lists mpv's interface changes
 # since the old pin. A human (see UPDATING.md) reviews those against OwnTV's option list, merges, tags.
 # The build runs here rather than on the PR because a PR opened with GITHUB_TOKEN triggers no workflows.
+# OwnTVnew fork: manual only (upstream's monthly dependency bump).
 on:
-  schedule:
-    - cron: "0 6 1 * *"
   workflow_dispatch:
 
 jobs:

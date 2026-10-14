@@ -21,6 +21,10 @@ v_mbedtls=3.6.7
 v_libplacebo=7.360.1
 v_dav1d=1.5.4
 v_ffmpeg=9.0.2
+# OwnTVnew: DVB teletext subtitles. zvbi = the teletext decoder FFmpeg wraps (libzvbi_teletext);
+# libiconv because Android 8 (API 26, this build's floor) has no iconv in bionic (added in API 28).
+v_libiconv=1.18
+v_zvbi=0.2.45
 # mpv is pinned to a commit on master, not a release tag: mpv makes no point releases, so every fix
 # after a release reaches users only through master. Bumped monthly — see UPDATING.md.
 v_mpv=3186d369f9f090cd1363be0ac46a037824b702c6
@@ -31,7 +35,10 @@ v_mpv=3186d369f9f090cd1363be0ac46a037824b702c6
 
 dep_mbedtls=()
 dep_dav1d=()
-dep_ffmpeg=(mbedtls dav1d libxml2)
+dep_libiconv=()
+dep_zvbi=(libiconv)
+# zvbi first: the newest and least-proven dependency fails early instead of after an hour.
+dep_ffmpeg=(zvbi mbedtls dav1d libxml2)
 dep_freetype2=()
 dep_fontconfig=(libxml2 freetype)
 dep_fribidi=()

@@ -44,6 +44,7 @@ MUST_HAVE = [
         "aac", "aac_latm", "ac3", "eac3", "dca", "truehd", "mlp", "mp2", "mp3", "opus", "flac",
         "vorbis", "s302m", "pcm_bluray", "pcm_dvd",
         "pgssub", "dvbsub", "dvdsub", "ccaption", "subrip", "ass", "webvtt", "movtext",
+        "libzvbi_teletext",  # OwnTVnew: DVB teletext subtitles
         "mjpeg", "png",
     ]),
     ("demuxer", "libavformat/demuxer_list.c", ["hls", "dash", "mpegts", "matroska", "mov", "flv", "aac", "ac3"]),

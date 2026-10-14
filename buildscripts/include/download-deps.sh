@@ -9,6 +9,16 @@ mkdir -p deps && cd deps
 # mbedtls
 [ ! -d mbedtls ] && git clone --depth 1 --branch v$v_mbedtls --recurse-submodules https://github.com/Mbed-TLS/mbedtls.git mbedtls
 
+# libiconv (OwnTVnew: needed by zvbi on API 26)
+if [ ! -d libiconv ]; then
+	mkdir libiconv
+	$WGET https://ftp.gnu.org/pub/gnu/libiconv/libiconv-$v_libiconv.tar.gz -O - | \
+		tar -xz -C libiconv --strip-components=1
+fi
+
+# zvbi (OwnTVnew: DVB teletext decoder)
+[ ! -d zvbi ] && git clone --depth 1 --branch v$v_zvbi https://github.com/zapping-vbi/zvbi.git zvbi
+
 # dav1d
 [ ! -d dav1d ] && git clone --depth 1 --branch $v_dav1d https://code.videolan.org/videolan/dav1d.git dav1d
 
