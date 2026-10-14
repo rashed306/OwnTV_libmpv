@@ -77,7 +77,12 @@ jobs:
           ./build.sh 2>&1 | tee "$RUNNER_TEMP/build.log"
           status=${PIPESTATUS[0]}
           if [ $status -ne 0 ]; then
-            msg=$(grep -v '^\s*$' "$RUNNER_TEMP/build.log" | tail -45)
+            # Error lines first (annotations are size-capped), then FFmpeg's own configure log tail
+            # when its configure is what stopped, then the last lines of output.
+            err=$(grep -iE 'error|not found|undefined reference|cannot find|failed' "$RUNNER_TEMP/build.log" | grep -v '^checking ' | tail -12)
+            ffl=$(ls -t deps/ffmpeg/_build*/ffbuild/config.log 2>/dev/null | head -1)
+            ffcfg=""; [ -n "$ffl" ] && ffcfg=$(tail -15 "$ffl" | cut -c1-200)
+            msg=$(printf '%s\n--- ffmpeg config.log ---\n%s\n--- tail ---\n%s' "$err" "$ffcfg" "$(grep -v '^\s*$' "$RUNNER_TEMP/build.log" | grep -v '^Installing ' | tail -8 | cut -c1-200)")
             msg=${msg//'%'/'%25'}; msg=${msg//$'\r'/'%0D'}; msg=${msg//$'\n'/'%0A'}
             echo "::error title=build.sh failed::$msg"
           fi
