@@ -1,0 +1,34 @@
+diff --git a/demux/demux_lavf.c b/demux/demux_lavf.c
+index 9536e62..5d27d19 100644
+--- a/demux/demux_lavf.c
++++ b/demux/demux_lavf.c
+@@ -885,6 +885,29 @@ static void handle_new_stream(demuxer_t *demuxer, int i)
+         AVDictionaryEntry *lang = av_dict_get(st->metadata, "language", NULL, 0);
+         if (lang && lang->value && strcmp(lang->value, "und") != 0)
+             sh->lang = talloc_strdup(sh, lang->value);
++        // OwnTVnew: a DVB teletext stream often carries several languages, each on its own page
++        // (PMT teletext descriptor; FFmpeg keeps 2 bytes per language in extradata: type<<3|magazine,
++        // page in BCD). Name them in the title, e.g. "teletext deu=150/2 eng=888/2", so the app can
++        // offer one entry per language and pick the page with --teletext-page.
++        if (!sh->title && st->codecpar->codec_id == AV_CODEC_ID_DVB_TELETEXT &&
++            st->codecpar->extradata && st->codecpar->extradata_size >= 2 &&
++            lang && lang->value)
++        {
++            char *t = talloc_strdup(sh, "teletext");
++            const char *l = lang->value;
++            for (int n = 0; n + 1 < st->codecpar->extradata_size; n += 2) {
++                if (strlen(l) < 3)
++                    break;
++                uint8_t b0 = st->codecpar->extradata[n], b1 = st->codecpar->extradata[n + 1];
++                int mag = b0 & 7;
++                int page = (mag ? mag : 8) * 100 + (b1 >> 4) * 10 + (b1 & 15);
++                t = talloc_asprintf_append(t, " %.3s=%d/%d", l, page, b0 >> 3);
++                l += 3;
++                if (*l == ',')
++                    l++;
++            }
++            sh->title = t;
++        }
+         sh->hls_bitrate = dict_get_decimal(st->metadata, "variant_bitrate", 0);
+         AVProgram *prog = NULL;
+         // In the order as reported by lavf
